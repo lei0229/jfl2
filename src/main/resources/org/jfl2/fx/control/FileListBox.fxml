@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?scenebuilder-classpath-element ../../../../../../build/classes/main?>
+
+<?language javascript?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<?import org.jfl2.fx.control.cell.Jfl2PropertyValueFactory?>
+
+<fx:root type="VBox" xmlns:jfl2="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml">
+    <ComboBox fx:id="comboBox" editable="true" prefWidth="1400" maxHeight="50000" maxWidth="50000"/>
+    <TableView fx:id="tableView" prefHeight="1000" prefWidth="1400" maxHeight="50000" maxWidth="50000">
+        <columns>
+            <TableColumn prefWidth="75.0" text="%File">
+                <cellValueFactory>
+                    <Jfl2PropertyValueFactory property="name" />
+                    <!-- <PropertyValueFactory property="size"/> -->
+                </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="75.0" text="%Size" >
+                <cellValueFactory>
+                    <Jfl2PropertyValueFactory property="size" />
+                    <!-- <PropertyValueFactory property="size"/> -->
+                </cellValueFactory>
+            </TableColumn>
+        </columns>
+        <!--
+        <stylesheets>
+            <URL value="@FileTableView.css"/>
+        </stylesheets>
+        -->
+    </TableView>
+    <fx:script>
+        tableView.getSelectionModel().setSelectionMode(javafx.scene.control.SelectionMode.MULTIPLE);
+    </fx:script>
+</fx:root>

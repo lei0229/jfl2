@@ -1,0 +1,9 @@
+
+#console .content{
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+#console .content .text{
+    -fx-fill: white;
+}

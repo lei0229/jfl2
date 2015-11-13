@@ -1,0 +1,68 @@
+//----------------------------------------
+.table-view {
+    -fx-focus-color: transparent;       // about focus
+    -fx-faint-focus-color: transparent; // about focus
+    -fx-accent: transparent;            // about focus
+    -fx-border-width: 0;                       // about grid
+    -fx-table-cell-border-color: transparent;  // about grid
+}
+
+//----------------------------------------
+// File list (Unfocused tab)
+.table-view {
+}
+.table-view .table-row-cell {
+    -fx-background-color: black;
+}
+.table-view .table-row-cell .text {
+    -fx-fill: white;
+    -fx-opacity: 0.5;
+}
+.table-view .attr-dir .text {
+    -fx-fill: Aqua;
+}
+.table-view .attr-readonly .text {
+    -fx-fill: GreenYellow;
+}
+.table-view .attr-hidden .text {
+    -fx-fill: Magenta;
+}
+
+// Cursor line (Unfocused tab)
+.table-view .table-row-cell:focused {
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-width: 0 0 1 0;
+}
+.table-view .table-row-cell:focused .text{
+}
+
+// Selected file (Unfocused tab)
+.table-view .table-row-cell:selected {
+    -fx-background-color: rgba(100,100,100, 1.0);
+    -fx-table-cell-border-color: transparent;  // about grid
+}
+
+//----------------------------------------
+// File list (Focused tab)
+.table-view:focused {
+}
+.table-view:focused .table-row-cell {
+}
+.table-view:focused .table-row-cell .text{
+    -fx-opacity: 0.8;
+}
+
+// Cursor line (Focused tab)
+.table-view:focused .table-row-cell:focused {
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-width: 0 0 1 0;
+}
+.table-view:focused .table-row-cell:focused .text {
+    -fx-opacity: 1.0;
+}
+
+// Selected file (Focused tab)
+.table-view:focused .table-row-cell:selected {
+    -fx-background-color: rgba(100,100,100, 1.0);
+}
+

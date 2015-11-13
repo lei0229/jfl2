@@ -1,0 +1,1 @@
+testInputStream用リソースファイル

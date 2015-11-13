@@ -1,0 +1,17 @@
+package org.jfl2.fx.controller.event.input;
+
+public enum EventTargetComponentType {
+    ANY,
+    MENU,
+    MENU_ITEMS,
+    FILELIST,
+    FILELIST_TABLEVIEW,
+    FILELIST_COMBOBOX,
+    LEFT_FILELIST,
+    LEFT_FILELIST_TABLEVIEW,
+    LEFT_FILELIST_COMBOBOX,
+    RIGHT_FILELIST,
+    RIGHT_FILELIST_TABLEVIEW,
+    RIGHT_FILELIST_COMBOBOX,
+    CONSOLE,;
+}

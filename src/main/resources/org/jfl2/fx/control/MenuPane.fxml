@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?scenebuilder-classpath-element ../../../../../../build/classes/main?>
+<?language javascript?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.FlowPane?>
+
+<?import javafx.scene.layout.VBox?>
+<fx:root type="FlowPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml">
+    <VBox fx:id="menuBox" styleClass="vBox">
+        <Label fx:id="title" text="Black Pane" textFill="WHITE"/>
+        <Label fx:id="description" text="Black Pane" textFill="WHITE"/>
+        <ListView fx:id="listView" focusTraversable="false"><items></items></ListView> <!-- -->
+        <VBox fx:id="radioBox" styleClass="vBox">
+        </VBox>
+    </VBox>
+</fx:root>

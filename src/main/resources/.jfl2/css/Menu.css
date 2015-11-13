@@ -1,0 +1,73 @@
+#menuPane{
+	-fx-background-color: rgba(0, 0, 0, 0.6);
+	-fx-alignment: center;
+}
+
+#menuPane #menuBox{
+	-fx-background-color: rgba(0, 0, 0, 0.7);
+	-fx-alignment: center;
+	-fx-border-color: white;
+	-fx-border-style: solid;
+	-fx-border-width: 0.1em;
+	-fx-border-radius: 1em;
+	-fx-background-radius: 1em;
+	-fx-border-insets: 0;
+	-fx-padding: 1em;
+	-fx-effect: dropshadow(gaussian, #000000, 10, 0.5, 3, 3);
+	-fx-min-height: 20;
+	-fx-min-width: 20;
+}
+
+#radioBox{
+	-fx-background-color: transparent;
+}
+#radioBox .radio{
+	visibility: collapse;
+}
+
+#menuPane #title {
+	-fx-font-size: 1.5em;
+	-fx-border-width: 0 0 0.1em 0;
+	-fx-border-style: solid;
+	-fx-border-color: white;
+	-fx-border-insets: 0 0 1em 0;
+}
+
+#menuPane #description {
+	-fx-padding: 0 0 1em 0;
+}
+
+#radioBox .radio-button{
+	-fx-text-fill: rgba(255, 255, 255, 0.6);
+}
+
+#radioBox .radio-button:selected{
+	-fx-text-fill: rgba(255, 255, 255, 1.0);
+}
+
+/* listは廃止 */
+.list-view {
+	//-fx-background-color: black;
+    -fx-focus-color: transparent;       // about focus
+    -fx-fixed-cell-size: 3em;
+}
+
+.list-cell .text{
+}
+
+.list-cell {
+	-fx-alignment: center;
+	-fx-background-color: #707070;
+	-fx-text-fill: rgba(255, 255, 255, 0.6);
+}
+
+.list-cell:empty {
+    -fx-visible: false;
+    visibility: collapse;
+	-fx-background-color: white;
+}
+
+.list-cell:focused {
+	-fx-text-fill: black;
+	-fx-background-color: white;
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?scenebuilder-classpath-element ../../../../../../build/classes/main?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+<?import org.jfl2.fx.control.FileListBox?>
+<?import org.jfl2.fx.control.MenuPane?>
+
+<StackPane fx:id="topPane" fx:controller="org.jfl2.fx.controller.Jfl2Controller" prefHeight="462.0" prefWidth="446.0"
+           BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml1">
+    <children>
+        <!-- Main Pane -->
+        <SplitPane fx:id="mainPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="150.0" prefWidth="200.0">
+            <items>
+                <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0">
+                    <items>
+                        <FileListBox fx:id="leftFileListBox" />
+                        <FileListBox fx:id="rightFileListBox" />
+                    </items>
+                </SplitPane>
+                <TextArea fx:id="console" prefHeight="243.0" prefWidth="403.0"/>
+            </items>
+        </SplitPane>
+        <!-- for dialog -->
+        <Pane fx:id="overwrapPane" prefHeight="200.0" prefWidth="200.0"
+              visible="false">
+            <children>
+                <Label text="Black Pane" textFill="WHITE"/>
+                <Label id="label" text="Blue Pane" textFill="#ff2222">
+                    <font>
+                        <Font size="35.0"/>
+                    </font>
+                </Label>
+            </children>
+        </Pane>
+        <!-- for menu -->
+        <MenuPane fx:id="menuPane" visible="false"/>
+    </children>
+</StackPane>
