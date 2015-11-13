@@ -2,6 +2,7 @@ package org.jfl2.fx.controller.adapter;
 
 import javafx.scene.control.TableView;
 import org.jfl2.core.conf.Jfl2History;
+import org.jfl2.file.Jfl2Path;
 import org.jfl2.fx.control.FileListBox;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      * @return
      */
     default int getCursorPosition() {
-        return getCurrent().getTableView().getFocusModel().getFocusedIndex();
+        return getCurrent().getCursorIndex();
     }
 
     /**
@@ -217,6 +218,42 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      */
     default T focusRight() {
         return focus(getJfl2().getRight());
+    }
+
+    /**
+     * ディレクトリ1個上がる
+     * @return
+     */
+    default T upDir() throws IOException {
+        return upDir(getCurrent());
+    }
+
+    /**
+     * ディレクトリ1個上がる
+     * @path target 対象Pane
+     * @return
+     */
+    default T upDir(FileListBox target) throws IOException {
+        target.upDir();
+        return getInstance();
+    }
+
+    /**
+     * カーソル下のディレクトリに移動
+     * @return
+     */
+    default T chDir() throws IOException {
+        return chDir(getCurrent());
+    }
+
+    /**
+     * カーソル下のディレクトリに移動
+     * @path target 対象Pane
+     * @return
+     */
+    default T chDir(FileListBox target) throws IOException {
+        target.setPath();
+        return getInstance();
     }
 
     /**
