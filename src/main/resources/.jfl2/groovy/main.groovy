@@ -50,6 +50,8 @@ jfl2.addEvent(FILELIST_TABLEVIEW, { eReg ->
     eReg.add(       KeyCode.B, { jfl2.cursorToBottom() });   // Make cursor line at the bottom
     eReg.add(       KeyCode.V, { jfl2.cursorToBottom() });   // Make cursor line at the bottom
     eReg.add(       KeyCode.SPACE, { jfl2.mark() });   // Make cursor line at the bottom
+    eReg.add(       KeyCode.ENTER, { jfl2.chDir() });    // Execute menu
+    eReg.add(       KeyCode.BACK_SPACE, { jfl2.upDir() });    // Execute menu
     //eReg.add( KeyCode.J, KEY_PRESSED, false, {e-> jfl2.down() }); // Cursor down
 
     eReg.add(CTRL, KeyCode.R, { jfl2.reloadAllCss() });     // Reload css files

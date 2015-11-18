@@ -295,6 +295,14 @@ public class Jfl2Path {
     }
 
     /**
+     * 親パス取得
+     * @return
+     */
+    public Jfl2Path getParent(){
+        return new Jfl2Path(path.getParent());
+    }
+
+    /**
      * Fetch path
      *
      * @return path

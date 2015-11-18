@@ -58,7 +58,9 @@ public class FileListBox extends VBox {
      * 表示中パス
      */
     private Jfl2Path currentPath;
-    private ObservableList<Jfl2Path> tableRecord = FXCollections.observableArrayList();
+
+    @Getter
+    private ObservableList<Jfl2Path> records = FXCollections.observableArrayList();
 
     private VirtualFlow flow;
     /**
@@ -219,6 +221,26 @@ public class FileListBox extends VBox {
     }
 
     /**
+     * up dir
+     *
+     * @return
+     * @throws IOException
+     */
+    public FileListBox upDir() throws IOException {
+        return setPath(getPath().getParent());
+    }
+
+    /**
+     * カーソル下のpathに移動
+     *
+     * @return
+     * @throws IOException
+     */
+    public FileListBox setPath() throws IOException {
+        return setPath(getCursorPath());
+    }
+
+    /**
      * setter
      *
      * @param path
@@ -286,13 +308,16 @@ public class FileListBox extends VBox {
      */
     public FileListBox setPath(Jfl2Path path, boolean moveFocus) throws IOException {
         log.debug("call setPath({}, {})", path, moveFocus);
+        if( !path.isDirectory() ){
+            return this;
+        }
 //        comboBox.getSelectionModel().selectedItemProperty().removeListener(comboSelectListener);
         currentPath = path;
 
         // List Box
         List<Jfl2Path> files = Files.list(currentPath.getPath()).map(o -> new Jfl2Path(o)).collect(Collectors.toList());
-        tableRecord = FXCollections.observableArrayList(files);
-        tableView.setItems(tableRecord);
+        records = FXCollections.observableArrayList(files);
+        tableView.setItems(records);
         setCursor(0, false, AUTO);
 
         // Combo Box
@@ -376,9 +401,19 @@ public class FileListBox extends VBox {
      *
      * @return
      */
-    private int getCursorIndex() {
+    public int getCursorIndex() {
         return tableView.getFocusModel().getFocusedIndex();
     }
+
+    /**
+     * カーソル位置取得
+     *
+     * @return
+     */
+    public Jfl2Path getCursorPath() {
+        return getRecords().get(getCursorIndex());
+    }
+
 
     /**
      * 表示行数取得
