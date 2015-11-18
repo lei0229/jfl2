@@ -18,6 +18,7 @@ import javax.xml.bind.DataBindingException;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -220,7 +221,7 @@ public class Jfl2History extends ConfigBase {
      * @param jfl2
      * @return
      */
-    public Jfl2History restorePathHistory(Jfl2Controller jfl2) throws IOException {
+    public Jfl2History restorePathHistory(Jfl2Controller jfl2) throws IOException, URISyntaxException {
         restorePathHistory(jfl2, leftHistory, jfl2.getLeft());
         restorePathHistory(jfl2, rightHistory, jfl2.getRight());
         return this;
@@ -233,7 +234,7 @@ public class Jfl2History extends ConfigBase {
      * @param list
      * @throws IOException
      */
-    private void restorePathHistory(Jfl2Controller jfl2, FileListBoxHistory history, FileListBox list) throws IOException {
+    private void restorePathHistory(Jfl2Controller jfl2, FileListBoxHistory history, FileListBox list) throws IOException, URISyntaxException {
         List<Jfl2Path> files = history.getPathHistory().stream().map(str -> new Jfl2Path(str)).collect(Collectors.toList());
         if (files.size() > 0) {
             list.setPathHistory(files);

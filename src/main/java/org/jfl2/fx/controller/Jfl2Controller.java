@@ -17,6 +17,7 @@ import org.jfl2.core.ResourceBundleManager;
 import org.jfl2.core.conf.ConfigBase;
 import org.jfl2.core.conf.Jfl2History;
 import org.jfl2.core.util.Jfl2ResouceUtils;
+import org.jfl2.file.system.CustomFileSystemOption;
 import org.jfl2.fx.control.FileListBox;
 import org.jfl2.fx.control.MenuPane;
 import org.jfl2.fx.controller.adapter.EventAdapter;
@@ -32,10 +33,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystems;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 
 @Slf4j
@@ -64,6 +62,12 @@ public class Jfl2Controller implements Initializable, FileListAdapter<Jfl2Contro
     @Getter
     @Setter
     private Jfl2Options options;
+
+    /**
+     * Extension to Scheme
+     */
+    @Getter
+    private Map<String, CustomFileSystemOption> ext2scheme = new HashMap<>();
 
     /**
      * Stage
@@ -165,6 +169,10 @@ public class Jfl2Controller implements Initializable, FileListAdapter<Jfl2Contro
             if (newValue) focusRight();
         });
 
+        // スキーマ情報マップ設定
+        leftFileListBox.setExt2Scheme(ext2scheme);
+        rightFileListBox.setExt2Scheme(ext2scheme);
+
         // イベントマネージャ初期化
         eventTargetComponentManager = getDefaultTargetComponentManager();
         // メニューウィンドマネージャ初期化
@@ -229,7 +237,7 @@ public class Jfl2Controller implements Initializable, FileListAdapter<Jfl2Contro
                     if(obj.getPath() == null ) {
                         try {
                             obj.setPath(FileSystems.getDefault().getRootDirectories().iterator().next().toString());
-                        } catch (IOException e) {
+                        } catch (IOException | URISyntaxException e) {
                             log.error("Could not fetch root directory.", e);
                         }
                     }

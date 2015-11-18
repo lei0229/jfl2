@@ -79,6 +79,12 @@ jfl2.addEvent(MENU_ITEMS, { eReg ->
 });
 
 
+// --------------------------------------------------------------------------------
+// Custom File System Configurations
+// --------------------------------------------------------------------------------
+//                   extension , scheme , option
+jfl2.addCustomFileScheme( "jar", "jar:", ["create":false, "encoding":"UTF-8"]);
+jfl2.addCustomFileScheme( "zip", "jar:", ["create":false, "encoding":"UTF-8"]);
 
 // --------------------------------------------------------------------------------
 // Menu section

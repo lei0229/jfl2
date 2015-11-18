@@ -2,8 +2,12 @@ package org.jfl2.fx.controller.adapter;
 
 import javafx.stage.Stage;
 import org.jfl2.core.conf.Jfl2History;
+import org.jfl2.file.system.CustomFileSystemOption;
 import org.jfl2.fx.controller.Jfl2Controller;
 import org.slf4j.Logger;
+
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * jfl2Controllerの操作分離クラス基本
@@ -98,6 +102,19 @@ public interface Jfl2Adapter<T extends Jfl2Adapter> {
 //        Platform.exit();
         getStage().getOnCloseRequest().handle(null); // バグなのかclose requestイベントが呼ばれないので自力で呼ぶ
         getStage().close();
+        return getInstance();
+    }
+
+    /**
+     * 拡張子ごとのURISchemeを設定する
+     *
+     * @param ext extension
+     * @param scheme Add to scheme string to head.
+     * @param env This value is passed to FileSystems.newFileSystem()
+     * @return
+     */
+    default T addCustomFileScheme(String ext, String scheme, Map<String, ?> env) {
+        getJfl2().getExt2scheme().put(ext, new CustomFileSystemOption(scheme, env));
         return getInstance();
     }
 

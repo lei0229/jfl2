@@ -6,7 +6,10 @@ import org.jfl2.file.Jfl2Path;
 import org.jfl2.fx.control.FileListBox;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<T> {
     /**
@@ -37,9 +40,14 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      */
     Jfl2History getJfl2History();
 
-    default T setPath() {
-        return getInstance();
-    }
+
+    /**
+     * フォーカス設定
+     *
+     * @param obj
+     * @return
+     */
+    T focus(FileListBox obj);
 
     /**
      * Pathのコンボボックスに残る履歴最大数を設定する
@@ -56,7 +64,7 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      *
      * @return
      */
-    default T restorePathHistory() throws IOException {
+    default T restorePathHistory() throws IOException, URISyntaxException {
         getJfl2History().restorePathHistory(getJfl2());
         return getInstance();
     }
@@ -224,7 +232,7 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      * ディレクトリ1個上がる
      * @return
      */
-    default T upDir() throws IOException {
+    default T upDir() throws IOException, URISyntaxException {
         return upDir(getCurrent());
     }
 
@@ -233,7 +241,7 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      * @path target 対象Pane
      * @return
      */
-    default T upDir(FileListBox target) throws IOException {
+    default T upDir(FileListBox target) throws IOException, URISyntaxException {
         target.upDir();
         return getInstance();
     }
@@ -242,7 +250,7 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      * カーソル下のディレクトリに移動
      * @return
      */
-    default T chDir() throws IOException {
+    default T chDir() throws IOException, URISyntaxException {
         return chDir(getCurrent());
     }
 
@@ -251,18 +259,10 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
      * @path target 対象Pane
      * @return
      */
-    default T chDir(FileListBox target) throws IOException {
+    default T chDir(FileListBox target) throws IOException, URISyntaxException {
         target.setPath();
         return getInstance();
     }
-
-    /**
-     * フォーカス設定
-     *
-     * @param obj
-     * @return
-     */
-    T focus(FileListBox obj);
 
     /**
      * 左右タブのフォーカスを入れ替える
@@ -277,4 +277,5 @@ public interface FileListAdapter<T extends FileListAdapter> extends Jfl2Adapter<
         }
         return getInstance();
     }
+
 }

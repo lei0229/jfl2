@@ -2,7 +2,9 @@ package org.jfl2.file;
 
 import javafx.collections.ObservableList;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 
 import java.io.IOException;
@@ -12,10 +14,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.*;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Pathに属性情報を追加
+ * Extended Path
+ * <ul>
+ *     <li>ファイル属性</li>
+ *     <li>仮想ディレクトリステータス</li>
+ * </ul>
  * symlink 関連情報ページ http://docs.oracle.com/cd/E26537_01/tutorial/essential/io/links.html#detect
  */
 @Slf4j
@@ -63,14 +70,20 @@ public class Jfl2Path {
     static final public List<String> CSS_MAC_LIST = Arrays.asList(CSS_ATTR_DIR, CSS_ATTR_SYMBOLIC_LINK, CSS_ATTR_EXECUTE, CSS_ATTR_WRITE, CSS_ATTR_READ);
     static final public List<String> CSS_LINUX_LIST = Arrays.asList(CSS_ATTR_DIR, CSS_ATTR_SYMBOLIC_LINK, CSS_ATTR_EXECUTE, CSS_ATTR_WRITE, CSS_ATTR_READ);
 
+    /**
+     * Original path of virtual directory
+     */
+    @Getter
+    private Jfl2Path virtualSourcePath = null;
+
     static {
-        Map<String, Class<? extends FileAttributeView>> hash = new HashMap<>();
-        hash.put("owner", FileOwnerAttributeView.class);
-        hash.put("dos", DosFileAttributeView.class);
-        hash.put("acl", AclFileAttributeView.class);
-        hash.put("basic", BasicFileAttributeView.class);
-        hash.put("user", UserDefinedFileAttributeView.class);
-        hash.put("posix", PosixFileAttributeView.class);
+//        Map<String, Class<? extends FileAttributeView>> hash = new HashMap<>();
+//        hash.put("owner", FileOwnerAttributeView.class);
+//        hash.put("dos", DosFileAttributeView.class);
+//        hash.put("acl", AclFileAttributeView.class);
+//        hash.put("basic", BasicFileAttributeView.class);
+//        hash.put("user", UserDefinedFileAttributeView.class);
+//        hash.put("posix", PosixFileAttributeView.class);
 //        str2FileAttributeViewClass = Collections.unmodifiableMap(hash);
     }
 
@@ -93,7 +106,18 @@ public class Jfl2Path {
      * @param path Specific value
      */
     public Jfl2Path(String path) {
-        this.path = Paths.get(path);
+        this(null, Paths.get(path));
+    }
+
+    /**
+     * constructor
+     *
+     * @param virtualSourcePath Specific value
+     * @param path Specific value
+     */
+    public Jfl2Path(Jfl2Path virtualSourcePath, Path path) {
+        this.virtualSourcePath = virtualSourcePath;
+        this.path = path;
     }
 
     /**
@@ -102,7 +126,7 @@ public class Jfl2Path {
      * @param path Specific value
      */
     public Jfl2Path(Path path) {
-        this.path = path;
+        this(null, path);
     }
 
     /**
@@ -142,13 +166,23 @@ public class Jfl2Path {
      * @throws IOException
      */
     public void readAttributes() throws IOException {
-        if (SystemUtils.IS_OS_WINDOWS) {
-            attributeMap = Files.readAttributes(path, DOS_ATTRS, LinkOption.NOFOLLOW_LINKS);
-        } else if (SystemUtils.IS_OS_MAC_OSX) {
-            attributeMap = Files.readAttributes(path, MAC_ATTRS, LinkOption.NOFOLLOW_LINKS);
-        } else {
+        Set<String> views = path.getFileSystem().supportedFileAttributeViews();
+        path.getFileSystem().supportedFileAttributeViews();
+        if(views.contains("posix")) {
             attributeMap = Files.readAttributes(path, POSIX_ATTRS, LinkOption.NOFOLLOW_LINKS);
+        }else if(views.contains("dos")){
+            attributeMap = Files.readAttributes(path, DOS_ATTRS, LinkOption.NOFOLLOW_LINKS);
+        } else {
+            attributeMap = Files.readAttributes(path, "basic:" + COMMON_ATTRS, LinkOption.NOFOLLOW_LINKS);
         }
+
+//        if (SystemUtils.IS_OS_WINDOWS) {
+//            attributeMap = Files.readAttributes(path, DOS_ATTRS, LinkOption.NOFOLLOW_LINKS);
+//        } else if (SystemUtils.IS_OS_MAC_OSX) {
+//            attributeMap = Files.readAttributes(path, MAC_ATTRS, LinkOption.NOFOLLOW_LINKS);
+//        } else {
+//            attributeMap = Files.readAttributes(path, POSIX_ATTRS, LinkOption.NOFOLLOW_LINKS);
+//        }
         log.debug(attributeMap.toString());
     }
 
@@ -216,6 +250,15 @@ public class Jfl2Path {
      * @return
      * @throws IOException
      */
+    public Boolean isFile() throws IOException {
+        return ! isDirectory();
+    }
+    /**
+     * Directoryフラグ取得
+     *
+     * @return
+     * @throws IOException
+     */
     public Boolean isDirectory() throws IOException {
         readAttributesIfNotRead();
         return (Boolean) attributeMap.get(ATTR_IS_DIRECTORY);
@@ -227,9 +270,9 @@ public class Jfl2Path {
      * @return
      * @throws IOException
      */
-    public Boolean isArchive() throws IOException {
+    public boolean isArchive() throws IOException {
         readAttributesIfNotRead();
-        return (Boolean) attributeMap.get(ATTR_ARCHIVE);
+        return Objects.equals(Boolean.TRUE, (Boolean) attributeMap.get(ATTR_ARCHIVE));
     }
 
     /**
@@ -238,9 +281,9 @@ public class Jfl2Path {
      * @return
      * @throws IOException
      */
-    public Boolean isSystem() throws IOException {
+    public boolean isSystem() throws IOException {
         readAttributesIfNotRead();
-        return (Boolean) attributeMap.get(ATTR_SYSTEM);
+        return Objects.equals(Boolean.TRUE, (Boolean) attributeMap.get(ATTR_SYSTEM));
     }
 
     /**
@@ -249,9 +292,9 @@ public class Jfl2Path {
      * @return
      * @throws IOException
      */
-    public Boolean isHidden() throws IOException {
+    public boolean isHidden() throws IOException {
         readAttributesIfNotRead();
-        return (Boolean) attributeMap.get(ATTR_HIDDEN);
+        return Objects.equals(Boolean.TRUE, (Boolean) attributeMap.get(ATTR_HIDDEN));
     }
 
     /**
@@ -260,9 +303,9 @@ public class Jfl2Path {
      * @return
      * @throws IOException
      */
-    public Boolean isReadonly() throws IOException {
+    public boolean isReadonly() throws IOException {
         readAttributesIfNotRead();
-        return (Boolean) attributeMap.get(ATTR_READONLY);
+        return Objects.equals(Boolean.TRUE, (Boolean) attributeMap.get(ATTR_READONLY));
     }
 
     /**
@@ -271,9 +314,9 @@ public class Jfl2Path {
      * @return
      * @throws IOException
      */
-    public Boolean isSymlink() throws IOException {
+    public boolean isSymlink() throws IOException {
         readAttributesIfNotRead();
-        return (Boolean) attributeMap.get(ATTR_IS_SYMBOLIC_LINK);
+        return Objects.equals(Boolean.TRUE, (Boolean) attributeMap.get(ATTR_IS_SYMBOLIC_LINK));
     }
 
     /**
@@ -286,12 +329,13 @@ public class Jfl2Path {
 
     /**
      * ファイル名取得
+     * rootの場合は空文字を返す
      *
      * @return
      * @throws IOException
      */
     public String getName() {
-        return path.getFileName().toString();
+        return FilenameUtils.getName(path.toString());
     }
 
     /**
@@ -299,7 +343,11 @@ public class Jfl2Path {
      * @return
      */
     public Jfl2Path getParent(){
-        return new Jfl2Path(path.getParent());
+        // virtualでルートなら、1個上は元ディレクトリ
+        if( isVirtual() && getPath().getParent() == null ) {
+            return virtualSourcePath.getParent();
+        }
+        return new Jfl2Path(virtualSourcePath, path.getParent());
     }
 
     /**
@@ -337,4 +385,28 @@ public class Jfl2Path {
         return this.path.getFileSystem().supportedFileAttributeViews().contains(VIEW_OWNER);
     }
 
+    /**
+     * Get extension
+     * @return
+     */
+    public String getExtension() {
+        return FilenameUtils.getExtension(path.toString());
+    }
+
+    /**
+     * If is this virtual directory then return true
+     * @return boolean
+     */
+    public boolean isVirtual(){
+        return  virtualSourcePath != null;
+    }
+
+    /**
+     * getName()がpatにmatchしたらtrueを返す
+     * @param pat 検査用Pattern
+     * @return マッチすればtrue
+     */
+    public boolean matchName(Pattern pat) {
+        return pat.matcher(getName()).find();
+    }
 }
