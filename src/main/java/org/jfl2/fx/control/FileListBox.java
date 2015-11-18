@@ -57,7 +57,7 @@ public class FileListBox extends VBox {
     /**
      * Extension to Scheme
      */
-    private Map<String,CustomFileSystemOption> ext2Scheme;
+    private Map<String, CustomFileSystemOption> ext2Scheme;
 
     /**
      * コンボボックスの履歴最大数
@@ -231,19 +231,30 @@ public class FileListBox extends VBox {
     }
 
     /**
+     * setter
+     *
+     * @param index
+     * @return
+     * @throws IOException
+     */
+    public FileListBox setPath(int index) throws IOException, URISyntaxException {
+        return setPath(index, false);
+    }
+
+    /**
      * up dir
      *
      * @return
      * @throws IOException
      */
     public FileListBox upDir() throws IOException, URISyntaxException {
-        Jfl2Path path = currentPath.getParent();
-        if( path != null ) {
+        Jfl2Path parent = currentPath.getParent();
+        if (parent != null) {
             String fName = currentPath.getName();
-            if( currentPath.isVirtual() ) {
+            if (currentPath.isVirtual() && !parent.isVirtual() ) {
                 fName = currentPath.getVirtualSourcePath().getName();
             }
-            setPath(path, "^" + Pattern.quote(fName) + "$");
+            setPath(parent, "^" + Pattern.quote(fName) + "$");
         }
         return this;
     }
@@ -296,17 +307,6 @@ public class FileListBox extends VBox {
      * setter
      *
      * @param index
-     * @return
-     * @throws IOException
-     */
-    public FileListBox setPath(int index) throws IOException, URISyntaxException {
-        return setPath(index, false);
-    }
-
-    /**
-     * setter
-     *
-     * @param index
      * @param moveFocus ファイル一覧にフォーカスを移すならtrue
      * @return
      * @throws IOException
@@ -332,22 +332,22 @@ public class FileListBox extends VBox {
     /**
      * setter
      *
-     * @param path         移動先Jfl2Path
-     * @param moveFocus    setPathしたPaneにフォーカスを移動する
-     * @param regExp 文字列検索してカーソルを移動させる
+     * @param path      移動先Jfl2Path
+     * @param moveFocus setPathしたPaneにフォーカスを移動する
+     * @param regExp    文字列検索してカーソルを移動させる
      * @return
      * @throws IOException
      */
-    public FileListBox setPath(Jfl2Path path, boolean moveFocus, String regExp ) throws IOException, URISyntaxException {
+    public FileListBox setPath(Jfl2Path path, boolean moveFocus, String regExp) throws IOException, URISyntaxException {
         log.debug("call setPath({}, {})", path, moveFocus);
 
         // init
         tableView.setItems(FXCollections.observableArrayList());
-        if(vFileSystem != null){
+        if (vFileSystem != null && !path.equalsVirtualSource(currentPath)) {
             vFileSystem.close();
         }
 
-        if( path.isFile() ) {
+        if (path.isFile()) {
             CustomFileSystemOption opt = ext2Scheme.get(path.getExtension());
             if (opt == null) {
                 return this;
@@ -356,27 +356,27 @@ public class FileListBox extends VBox {
             URI newURI = new URI(opt.scheme + orgURI.getScheme(), orgURI.getSchemeSpecificPart(), orgURI.getFragment());
             vFileSystem = FileSystems.newFileSystem(newURI, opt.env);
 
-            for( Path root : vFileSystem.getRootDirectories() ){
+            for (Path root : vFileSystem.getRootDirectories()) {
                 currentPath = new Jfl2Path(path, root);
                 break;
             }
-        }else{
+        } else {
             currentPath = path;
         }
 
         // List Box
-        List<Jfl2Path> files = Files.list(currentPath.getPath()).map(o -> new Jfl2Path(o)).collect(Collectors.toList());
+        List<Jfl2Path> files = Files.list(currentPath.getPath()).map(o -> new Jfl2Path(currentPath.getVirtualSourcePath(), o)).collect(Collectors.toList());
         records = FXCollections.observableArrayList(files);
         tableView.setItems(records);
 
-        if( regExp == null ) {
+        if (regExp == null) {
             setCursor(0, false, AUTO);
-        }else{
-            setCursor(regExp);
+        } else {
+            setCursor(regExp, 0);
         }
 
         // Combo Box
-        addComboBox(path);
+        addComboBox(currentPath);
         comboBox.getSelectionModel().selectFirst();
 
         // Fire event
@@ -577,12 +577,25 @@ public class FileListBox extends VBox {
      * @param regExp 検査用文字列
      * @return this
      */
-    public FileListBox setCursor(String regExp){
+    public FileListBox setCursor(String regExp) {
+        return setCursor(regExp, -1);
+    }
+    /**
+     * ファイル名一致カーソル移動
+     *
+     * @param regExp 検査用文字列
+     * @param defaultIndex 見つからなかったときのindex。0以下で変更しない
+     * @return this
+     */
+    public FileListBox setCursor(String regExp, int defaultIndex) {
         final Pattern pat = Pattern.compile(regExp);
-        for(int n=0; n<=records.size(); n++){
-            if( records.get(n).matchName(pat) ){
+        for (int n = 0; n < records.size(); n++) {
+            if (records.get(n).matchName(pat)) {
                 return setCursor(n, false, AUTO);
             }
+        }
+        if( defaultIndex >= 0 ){
+            return setCursor(0, false, AUTO);
         }
         return this;
     }
@@ -639,6 +652,7 @@ public class FileListBox extends VBox {
 
     /**
      * フォーカスをTableViewに移す
+     *
      * @return this
      */
     public FileListBox focusList() {
@@ -650,6 +664,7 @@ public class FileListBox extends VBox {
 
     /**
      * setter
+     *
      * @param ext2Scheme
      */
     public void setExt2Scheme(Map<String, CustomFileSystemOption> ext2Scheme) {

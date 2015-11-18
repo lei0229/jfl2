@@ -235,10 +235,14 @@ public class Jfl2History extends ConfigBase {
      * @throws IOException
      */
     private void restorePathHistory(Jfl2Controller jfl2, FileListBoxHistory history, FileListBox list) throws IOException, URISyntaxException {
+        if(history == null){
+            return;
+        }
         List<Jfl2Path> files = history.getPathHistory().stream().map(str -> new Jfl2Path(str)).collect(Collectors.toList());
         if (files.size() > 0) {
             list.setPathHistory(files);
             list.setPath(files.get(0));
+            log.debug("Restore path {}", files.get(0));
         }
         if (history.isFocus()) {
             jfl2.focus(list);

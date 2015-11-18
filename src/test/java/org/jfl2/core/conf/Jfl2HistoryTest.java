@@ -5,20 +5,27 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import mockit.Expectations;
 import mockit.Mocked;
-import org.hamcrest.CoreMatchers;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.jfl2.core.Jfl2Const;
+import org.jfl2.file.Jfl2Path;
+import org.jfl2.fx.control.FileListBox;
 import org.jfl2.fx.controller.Jfl2Controller;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class Jfl2HistoryTest {
     @Mocked
     Jfl2Controller jfl2;
+    @Mocked
+    FileListBox left;
+    @Mocked
+    FileListBox right;
     @Mocked
     Stage stage;
 
@@ -86,7 +93,7 @@ public class Jfl2HistoryTest {
     }
 
     @Test
-    public void testRemoveNullProperty() throws Exception{
+    public void testRemoveNullProperty() throws Exception {
         Jfl2History history = new Jfl2History();
         assertThat(history.getMainFrameHistory(), nullValue());
         assertThat(history.getLeftHistory(), nullValue());
@@ -103,18 +110,61 @@ public class Jfl2HistoryTest {
 
     /**
      * 終了処理中にExceptionが発生しても外には投げない
+     *
      * @throws Exception
      */
-    public void exceptionOnQuit() throws Exception{
+    public void exceptionOnQuit() throws Exception {
         Jfl2History history = new Jfl2History();
-        new Expectations(){{
+        new Expectations() {{
             jfl2.getStage();
             result = stage;
             times = 1;
-            stage.setOnCloseRequest((EventHandler<WindowEvent>)any);
+            stage.setOnCloseRequest((EventHandler<WindowEvent>) any);
             times = 1;
         }};
 
         history.addListener(jfl2);
     }
+
+    /**
+     * @throws Exception
+     */
+    @Test
+    public void testVirtualPath() throws IOException, URISyntaxException {
+        Jfl2Path target = new Jfl2Path("first" + Jfl2Const.VIRTUAL_DIR_DELIMITER + "inner");
+        new Expectations() {{
+            jfl2.getLeft();
+            result = left;
+            jfl2.getRight();
+            result = right;
+            jfl2.focus(left);
+            times = 1;
+            left.setPathHistory((List<Jfl2Path>) any);
+            times = 1;
+//            left.setPath(target);
+            left.setPath((Jfl2Path)any);
+            times = 1;
+            right.setPathHistory((List< Jfl2Path>)any);
+            times = 0;
+            right.setPath((Jfl2Path)any);
+            times = 0;
+        }};
+
+        Jfl2History history = Jfl2History.fromXml("<jfl2_history><filelist_left><focus>true</focus><path_history>first" + StringEscapeUtils.escapeXml(Jfl2Const.VIRTUAL_DIR_DELIMITER) + "inner</path_history><path_history>second</path_history><path_history>third</path_history></filelist_left></jfl2_history>", Jfl2History.class);
+        assertThat(history.getMainFrameHistory(), nullValue());
+        assertThat(history.getLeftHistory(), notNullValue());
+        assertThat(history.getRightHistory(), nullValue());
+
+        assertThat(history.getLeftHistory().isFocus(), is(true));
+        assertThat(history.getLeftHistory().getPathHistory().size(), is(3));
+        assertThat(history.getLeftHistory().getPathHistory().get(0), is("first" + Jfl2Const.VIRTUAL_DIR_DELIMITER + "inner"));
+        assertThat(history.getLeftHistory().getPathHistory().get(1), is("second"));
+        assertThat(history.getLeftHistory().getPathHistory().get(2), is("third"));
+
+        history.restorePathHistory(jfl2);
+
+        String xmlResult = "{\"main_frame\":null,\"filelist_left\":{\"focus\":true,\"path_history\":[\"first" + Jfl2Const.VIRTUAL_DIR_DELIMITER + "inner\",\"second\",\"third\"]},\"filelist_right\":null}";
+        assertThat(history.toJson(), is(xmlResult));
+    }
+
 }

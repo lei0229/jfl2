@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.jfl2.core.Jfl2Const;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  * symlink 関連情報ページ http://docs.oracle.com/cd/E26537_01/tutorial/essential/io/links.html#detect
  */
 @Slf4j
-@EqualsAndHashCode(of = "path")
+@EqualsAndHashCode(of = {"path", "virtualSourcePath"})
 public class Jfl2Path {
     private static final String VIEW_OWNER = "owner";
     private static final String VIEW_DOS = "dos";
@@ -101,12 +102,24 @@ public class Jfl2Path {
     private Map<String, Class<? extends FileAttributeView>> str2FileAttributeViewClass;
 
     /**
+     * 名前のキャッシュ用
+     */
+    private String cachedName;
+
+    /**
      * constructor
      *
      * @param path Specific value
      */
     public Jfl2Path(String path) {
-        this(null, Paths.get(path));
+        // Virtual path に対応
+        if( path.contains(Jfl2Const.VIRTUAL_DIR_DELIMITER )){
+            String [] list = path.split(Jfl2Const.VIRTUAL_DIR_DELIMITER , 2);
+            this.virtualSourcePath = new Jfl2Path(list[0]);
+            this.path = Paths.get(list[1]);
+        }else {
+            this.path = Paths.get(path);
+        }
     }
 
     /**
@@ -146,7 +159,11 @@ public class Jfl2Path {
      */
     @Override
     public String toString() {
-        return path.toString();
+        if(isVirtual()) {
+            return virtualSourcePath.toString() + Jfl2Const.VIRTUAL_DIR_DELIMITER + path.toString();
+        }else{
+            return path.toString();
+        }
     }
 
     /**
@@ -335,7 +352,28 @@ public class Jfl2Path {
      * @throws IOException
      */
     public String getName() {
-        return FilenameUtils.getName(path.toString());
+        if( cachedName == null ){
+            cachedName = _getName();
+        }
+        return cachedName;
+    }
+
+    /**
+     * 名前取得します
+     *
+     * @return
+     */
+    private String _getName(){
+        Path name = path.getFileName();
+        if( name == null ){
+            return "";
+        }
+        String fName = name.toString();
+        String separator = path.getFileSystem().getSeparator();
+        if(fName.endsWith(separator)){
+            fName = fName.substring(0, fName.length()-separator.length());
+        }
+        return fName;
     }
 
     /**
@@ -408,5 +446,14 @@ public class Jfl2Path {
      */
     public boolean matchName(Pattern pat) {
         return pat.matcher(getName()).find();
+    }
+
+    /**
+     * 仮想ディレクトリの元ファイルが同じならtrueを返す
+     * @param dst thisと比較するオブジェクト
+     * @return
+     */
+    public boolean equalsVirtualSource(Jfl2Path dst){
+        return Objects.equals(this.getVirtualSourcePath(), dst.getVirtualSourcePath());
     }
 }

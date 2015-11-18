@@ -11,6 +11,7 @@ public interface Jfl2Const {
     String DIR_DISPLAY = "<dir>";
     String DATETIME_FORMAT_RFC_3339 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     String JFL2_HISTORY_JSON_FILE = "jfl2_history.xml";
+    String VIRTUAL_DIR_DELIMITER = " > ";
 
     /**
      * 最大値セット用
